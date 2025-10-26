@@ -52,7 +52,7 @@
       apiKey: "AIzaSyBHdDsPNyKOUJ8INQHV_yYEnVwi9S6Ydoc",
       authDomain: "trox-waked.firebaseapp.com",
       projectId: "trox-waked",
-      storageBucket: "trox-waked.firebasestorage.app",
+      storageBucket: "trox-waked.appspot.com",
       messagingSenderId: "168070929379",
       appId: "1:168070929379:web:caea88d1b0d551eef99ed6",
       measurementId: "G-TC3G2GBSRS"
@@ -95,6 +95,8 @@
     }
 
     function createStar(capsule) {
+      if (!capsule.type || !capsule.message) return;
+
       const geometry = new THREE.SphereGeometry(1.2, 16, 16);
       const material = new THREE.MeshBasicMaterial({ color: getColor(capsule.type) });
       const star = new THREE.Mesh(geometry, material);
@@ -145,11 +147,21 @@
 
     animate();
 
-    db.collection("capsules").get().then(snapshot => {
-      snapshot.forEach(doc => {
-        createStar(doc.data());
+    // جلب الكبسولات بترتيب زمني
+    db.collection("capsules")
+      .orderBy("timestamp", "desc")
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          const capsule = doc.data();
+          if (capsule.type && capsule.message) {
+            createStar(capsule);
+          }
+        });
+      })
+      .catch(error => {
+        console.error("خطأ في جلب الكبسولات:", error);
       });
-    });
   </script>
 </body>
 </html>
