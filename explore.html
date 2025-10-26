@@ -2,124 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>استكشاف الكبسولات</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <title>Explore Capsules 3D</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: radial-gradient(ellipse at center, #000000 0%, #0D1B2A 100%);
+    body { margin: 0; overflow: hidden; background: #000; }
+    #messageBox {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 10px;
       font-family: 'Cairo', sans-serif;
-      color: #D8D6FF;
-      min-height: 100vh;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-
-    h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2rem;
-      margin-bottom: 30px;
-      color: #B8AFFF;
-      text-align: center;
-      text-shadow: 0 0 15px #6A5ACD;
-    }
-
-    .capsule-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .capsule {
-      position: relative;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 0 15px rgba(106, 90, 205, 0.2);
-      transition: transform 0.3s ease;
-      cursor: pointer;
-      overflow: hidden;
-    }
-
-    .capsule:hover {
-      transform: scale(1.03);
-    }
-
-    .capsule img {
-      width: 100%;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      transition: opacity 0.5s ease;
-    }
-
-    .capsule .type {
-      font-weight: bold;
-      color: #B8AFFF;
-      margin-bottom: 8px;
-    }
-
-    .capsule .message {
-      font-size: 0.95rem;
-      color: #ccc;
-      line-height: 1.5;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: all 0.6s ease;
-      text-align: center;
-    }
-
-    .capsule.explode img {
-      opacity: 0;
-    }
-
-    .capsule.explode .message {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .capsule .message {
-        font-size: 0.9rem;
-      }
+      font-size: 1rem;
+      display: none;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-  <h1>استكشاف الكبسولات</h1>
-
-  <div class="capsule-grid">
-    <!-- كبسولة 1 -->
-    <div class="capsule" onclick="explodeCapsule(this)">
-      <img src="https://www.artstation.com/artwork/rJPrRa" alt="VIP Capsule">
-      <div class="type">VIP ذهبية</div>
-      <div class="message">هذه كبسولة خاصة تحمل رسالة فخر وقيادة في عالم TROX.</div>
-    </div>
-
-    <!-- كبسولة 2 -->
-    <div class="capsule" onclick="explodeCapsule(this)">
-      <img src="https://sketchfab.com/3d-models/sci-fi-capsule-25a6c93f3c9148e8931c36421b6a6eb7" alt="Thought Capsule">
-      <div class="type">فكرية</div>
-      <div class="message">الفكرة التي أطلقتها هنا تتعلق بالوعي الرقمي والتحول المعرفي.</div>
-    </div>
-
-    <!-- كبسولة 3 -->
-    <div class="capsule" onclick="explodeCapsule(this)">
-      <img src="https://www.pinterest.com/pin/scifi-capsule-for-futuristic-interior-decor--140104238398759571/" alt="Symbolic Capsule">
-      <div class="type">رمزية</div>
-      <div class="message">رمز يمثل بداية جديدة في فضاء الكبسولات.</div>
-    </div>
-  </div>
-
+  <div id="messageBox"></div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
   <script>
-    function explodeCapsule(el) {
-      el.classList.add('explode');
+    // إعداد المشهد
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // تحكم بالكاميرا
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    camera.position.z = 10;
+
+    // نجوم
+    const stars = new THREE.BufferGeometry();
+    const starCount = 1000;
+    const starPositions = [];
+    for (let i = 0; i < starCount; i++) {
+      starPositions.push((Math.random() - 0.5) * 200);
+      starPositions.push((Math.random() - 0.5) * 200);
+      starPositions.push((Math.random() - 0.5) * 200);
     }
+    stars.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+    const starField = new THREE.Points(stars, starMaterial);
+    scene.add(starField);
+
+    // كبسولات
+    const capsules = [];
+    const messages = [
+      "رسالة VIP: القيادة تبدأ من هنا.",
+      "رسالة فكرية: الوعي هو أول خطوة.",
+      "رسالة رمزية: بداية جديدة في TROX."
+    ];
+
+    for (let i = 0; i < 3; i++) {
+      const geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
+      const material = new THREE.MeshStandardMaterial({ color: [0xffd700, 0x6A5ACD, 0x00FFB2][i], emissive: 0x111111 });
+      const capsule = new THREE.Mesh(geometry, material);
+      capsule.position.x = (i - 1) * 4;
+      capsule.userData.message = messages[i];
+      scene.add(capsule);
+      capsules.push(capsule);
+    }
+
+    // إضاءة
+    const light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    // انفجار الكبسولة
+    function explodeCapsule(capsule) {
+      capsule.scale.set(2, 2, 2);
+      capsule.material.opacity = 0.2;
+      document.getElementById("messageBox").innerText = capsule.userData.message;
+      document.getElementById("messageBox").style.display = "block";
+    }
+
+    // كشف الضغط
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    window.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(capsules);
+      if (intersects.length > 0) {
+        explodeCapsule(intersects[0].object);
+      }
+    });
+
+    // تحديث
+    function animate() {
+      requestAnimationFrame(animate);
+      starField.rotation.y += 0.0005;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
