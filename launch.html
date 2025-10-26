@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -19,7 +19,6 @@
       min-height: 100vh;
       padding: 20px;
     }
-
     h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 2rem;
@@ -28,7 +27,6 @@
       text-shadow: 0 0 15px #6A5ACD;
       text-align: center;
     }
-
     form {
       background: rgba(255, 255, 255, 0.05);
       padding: 20px;
@@ -37,14 +35,12 @@
       width: 100%;
       max-width: 400px;
     }
-
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: bold;
       color: #B8AFFF;
     }
-
     select, textarea, input[type="file"] {
       width: 100%;
       padding: 10px;
@@ -55,12 +51,10 @@
       color: #fff;
       font-size: 1rem;
     }
-
     textarea {
       resize: vertical;
       min-height: 100px;
     }
-
     .btn {
       width: 100%;
       padding: 12px;
@@ -73,25 +67,10 @@
       transition: all 0.3s ease;
       font-family: 'Orbitron', sans-serif;
     }
-
     .btn:hover {
       background: #B8AFFF;
       color: #000;
       box-shadow: 0 0 20px #B8AFFF;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      form {
-        padding: 15px;
-      }
-
-      .btn {
-        font-size: 0.9rem;
-      }
     }
   </style>
 </head>
@@ -102,10 +81,10 @@
     <label for="type">نوع الكبسولة</label>
     <select id="type" required>
       <option value="">اختر نوع الكبسولة</option>
-      <option value="thought">فكرية</option>
-      <option value="symbolic">رمزية</option>
-      <option value="vip">VIP ذهبية</option>
-      <option value="fantasy">خيالية</option>
+      <option value="فكرية">فكرية</option>
+      <option value="رمزية">رمزية</option>
+      <option value="VIP">VIP ذهبية</option>
+      <option value="خيالية">خيالية</option>
     </select>
 
     <label for="message">رسالة الكبسولة</label>
@@ -117,17 +96,54 @@
     <button class="btn" type="submit">إطلاق الكبسولة</button>
   </form>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
   <script>
-    function handleLaunch(e) {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHdDsPNyKOUJ8INQHV_yYEnVwi9S6Ydoc",
+      authDomain: "trox-waked.firebaseapp.com",
+      projectId: "trox-waked",
+      storageBucket: "trox-waked.appspot.com",
+      messagingSenderId: "168070929379",
+      appId: "1:168070929379:web:caea88d1b0d551eef99ed6",
+      measurementId: "G-TC3G2GBSRS"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    async function handleLaunch(e) {
       e.preventDefault();
       const type = document.getElementById('type').value;
       const message = document.getElementById('message').value;
-      const image = document.getElementById('image').files[0];
+      const imageFile = document.getElementById('image').files[0];
 
-      // عرض البيانات مؤقتًا
-      alert(`تم اختيار نوع: ${type}\nالرسالة: ${message}\n${image ? "تم رفع صورة" : "بدون صورة"}`);
+      let imageUrl = "";
 
-      // لاحقًا: إرسال البيانات للسيرفر أو تحويلها لكبسولة حقيقية
+      try {
+        if (imageFile) {
+          const storageRef = storage.ref(`capsules/${Date.now()}_${imageFile.name}`);
+          await storageRef.put(imageFile);
+          imageUrl = await storageRef.getDownloadURL();
+        }
+
+        await db.collection("capsules").add({
+          type,
+          message,
+          imageUrl,
+          timestamp: new Date()
+        });
+
+        alert("✅ تم إطلاق الكبسولة بنجاح!");
+        document.querySelector("form").reset();
+      } catch (error) {
+        console.error("❌ خطأ أثناء الإرسال:", error);
+        alert("حدث خطأ أثناء إطلاق الكبسولة. تحقق من الاتصال أو صلاحيات Firebase.");
+      }
     }
   </script>
 </body>
