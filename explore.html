@@ -147,7 +147,6 @@
 
     animate();
 
-    // جلب الكبسولات بترتيب زمني
     db.collection("capsules")
       .orderBy("timestamp", "desc")
       .get()
