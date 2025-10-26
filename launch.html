@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إطلاق كبسولة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(ellipse at center, #000000 0%, #0D1B2A 100%);
+      font-family: 'Cairo', sans-serif;
+      color: #D8D6FF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #B8AFFF;
+      text-shadow: 0 0 15px #6A5ACD;
+      text-align: center;
+    }
+
+    form {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(106, 90, 205, 0.3);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #B8AFFF;
+    }
+
+    select, textarea, input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: none;
+      background: #1A1A2E;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 2px solid #B8AFFF;
+      color: #B8AFFF;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn:hover {
+      background: #B8AFFF;
+      color: #000;
+      box-shadow: 0 0 20px #B8AFFF;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      form {
+        padding: 15px;
+      }
+
+      .btn {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>إطلاق كبسولة جديدة</h1>
+
+  <form onsubmit="handleLaunch(event)">
+    <label for="type">نوع الكبسولة</label>
+    <select id="type" required>
+      <option value="">اختر نوع الكبسولة</option>
+      <option value="thought">فكرية</option>
+      <option value="symbolic">رمزية</option>
+      <option value="vip">VIP ذهبية</option>
+      <option value="fantasy">خيالية</option>
+    </select>
+
+    <label for="message">رسالة الكبسولة</label>
+    <textarea id="message" placeholder="اكتب رسالتك هنا..." required></textarea>
+
+    <label for="image">صورة اختيارية</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <button class="btn" type="submit">إطلاق الكبسولة</button>
+  </form>
+
+  <script>
+    function handleLaunch(e) {
+      e.preventDefault();
+      const type = document.getElementById('type').value;
+      const message = document.getElementById('message').value;
+      const image = document.getElementById('image').files[0];
+
+      // عرض البيانات مؤقتًا
+      alert(`تم اختيار نوع: ${type}\nالرسالة: ${message}\n${image ? "تم رفع صورة" : "بدون صورة"}`);
+
+      // لاحقًا: إرسال البيانات للسيرفر أو تحويلها لكبسولة حقيقية
+    }
+  </script>
+</body>
+</html>
