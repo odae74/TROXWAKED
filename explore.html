@@ -2,111 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Explore Capsules 3D</title>
+  <title>استكشاف كبسولات TROX</title>
   <style>
     body { margin: 0; overflow: hidden; background: #000; }
-    #messageBox {
+    #infoBox {
       position: absolute;
       top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7);
+      left: 20px;
+      background: rgba(0,0,0,0.85);
       color: #fff;
-      padding: 15px 20px;
+      padding: 20px;
       border-radius: 10px;
-      font-family: 'Cairo', sans-serif;
-      font-size: 1rem;
+      max-width: 300px;
       display: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    #infoBox img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    #musicToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
       z-index: 10;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <div id="messageBox"></div>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+  <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3f9b9c3b3e.mp3" loop autoplay></audio>
+  <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6f8f8c3b3e.mp3"></audio>
+  <button id="musicToggle">🔊</button>
+  <div id="infoBox"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
   <script>
-    // إعداد المشهد
+    const firebaseConfig = {
+      apiKey: "AIzaSyBHdDsPNyKOUJ8INQHV_yYEnVwi9S6Ydoc",
+      authDomain: "trox-waked.firebaseapp.com",
+      projectId: "trox-waked",
+      storageBucket: "trox-waked.firebasestorage.app",
+      messagingSenderId: "168070929379",
+      appId: "1:168070929379:web:caea88d1b0d551eef99ed6",
+      measurementId: "G-TC3G2GBSRS"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
-    // تحكم بالكاميرا
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    camera.position.z = 10;
+    camera.position.z = 50;
 
-    // نجوم
-    const stars = new THREE.BufferGeometry();
-    const starCount = 1000;
-    const starPositions = [];
-    for (let i = 0; i < starCount; i++) {
-      starPositions.push((Math.random() - 0.5) * 200);
-      starPositions.push((Math.random() - 0.5) * 200);
-      starPositions.push((Math.random() - 0.5) * 200);
-    }
-    stars.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
-    const starField = new THREE.Points(stars, starMaterial);
-    scene.add(starField);
-
-    // كبسولات
-    const capsules = [];
-    const messages = [
-      "رسالة VIP: القيادة تبدأ من هنا.",
-      "رسالة فكرية: الوعي هو أول خطوة.",
-      "رسالة رمزية: بداية جديدة في TROX."
-    ];
-
-    for (let i = 0; i < 3; i++) {
-      const geometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 32);
-      const material = new THREE.MeshStandardMaterial({ color: [0xffd700, 0x6A5ACD, 0x00FFB2][i], emissive: 0x111111 });
-      const capsule = new THREE.Mesh(geometry, material);
-      capsule.position.x = (i - 1) * 4;
-      capsule.userData.message = messages[i];
-      scene.add(capsule);
-      capsules.push(capsule);
-    }
-
-    // إضاءة
-    const light = new THREE.PointLight(0xffffff, 1);
-    light.position.set(10, 10, 10);
-    scene.add(light);
-
-    // انفجار الكبسولة
-    function explodeCapsule(capsule) {
-      capsule.scale.set(2, 2, 2);
-      capsule.material.opacity = 0.2;
-      document.getElementById("messageBox").innerText = capsule.userData.message;
-      document.getElementById("messageBox").style.display = "block";
-    }
-
-    // كشف الضغط
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    window.addEventListener('click', (event) => {
+    const infoBox = document.getElementById("infoBox");
+    const clickSound = document.getElementById("clickSound");
+    const bgMusic = document.getElementById("bgMusic");
+    const musicToggle = document.getElementById("musicToggle");
+
+    musicToggle.onclick = () => {
+      if (bgMusic.paused) {
+        bgMusic.play();
+        musicToggle.innerText = "🔊";
+      } else {
+        bgMusic.pause();
+        musicToggle.innerText = "🔇";
+      }
+    };
+
+    const capsuleStars = [];
+
+    function getColor(type) {
+      if (type === "VIP") return 0xffd700;
+      if (type === "فكرية") return 0x00bfff;
+      if (type === "رمزية") return 0x8a2be2;
+      return 0xffffff;
+    }
+
+    function createStar(capsule) {
+      const geometry = new THREE.SphereGeometry(1.2, 16, 16);
+      const material = new THREE.MeshBasicMaterial({ color: getColor(capsule.type) });
+      const star = new THREE.Mesh(geometry, material);
+      star.position.set(
+        Math.random() * 100 - 50,
+        Math.random() * 100 - 50,
+        Math.random() * 100 - 50
+      );
+      star.userData = capsule;
+      scene.add(star);
+      capsuleStars.push(star);
+    }
+
+    function showInfo(capsule) {
+      clickSound.play();
+      infoBox.innerHTML = `<strong>${capsule.type}</strong><br>${capsule.message}`;
+      if (capsule.imageUrl) {
+        infoBox.innerHTML += `<img src="${capsule.imageUrl}" alt="صورة الكبسولة" />`;
+      }
+      infoBox.style.display = "block";
+    }
+
+    function hideInfo() {
+      infoBox.style.display = "none";
+    }
+
+    window.addEventListener("click", (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(capsules);
+      const intersects = raycaster.intersectObjects(capsuleStars);
       if (intersects.length > 0) {
-        explodeCapsule(intersects[0].object);
+        const capsule = intersects[0].object.userData;
+        showInfo(capsule);
+      } else {
+        hideInfo();
       }
     });
 
-    // تحديث
     function animate() {
       requestAnimationFrame(animate);
-      starField.rotation.y += 0.0005;
+      capsuleStars.forEach(star => {
+        star.rotation.y += 0.005;
+      });
+      controls.update();
       renderer.render(scene, camera);
     }
+
     animate();
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    db.collection("capsules").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        createStar(doc.data());
+      });
     });
   </script>
 </body>
