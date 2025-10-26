@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Capsule Space</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #000000 0%, #0D1B2A 100%);
+      font-family: 'Cairo', sans-serif;
+      overflow: hidden;
+      color: #D8D6FF;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #B8AFFF;
+      text-shadow: 0 0 15px #6A5ACD;
+    }
+
+    p {
+      font-size: 1rem;
+      max-width: 500px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      margin: 10px;
+      background: transparent;
+      border: 2px solid #B8AFFF;
+      color: #B8AFFF;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn:hover {
+      background: #B8AFFF;
+      color: #000;
+      box-shadow: 0 0 20px #B8AFFF;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+        max-width: 90%;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+
+  <div class="container">
+    <h1>فضاء الكبسولات</h1>
+    <p>هنا تبدأ رحلتك في عالم TROX. اختر كبسولتك، أو استكشف أفكار الآخرين، أو أطلق رسالتك الخاصة.</p>
+    <button class="btn" onclick="launchCapsule()">إطلاق كبسولة جديدة</button>
+    <button class="btn" onclick="exploreCapsules()">استكشاف الكبسولات</button>
+    <button class="btn" onclick="goBack()">العودة للصفحة الرئيسية</button>
+  </div>
+
+  <script>
+    function launchCapsule() {
+      window.location.href = "launch.html";
+    }
+
+    function exploreCapsules() {
+      window.location.href = "explore.html";
+    }
+
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    // خلفية نجوم
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8,
+          alpha: Math.random() * 0.8 + 0.2,
+          dx: (Math.random() - 0.5) * 0.2,
+          dy: (Math.random() - 0.5) * 0.2
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        ctx.fill();
+        star.x += star.dx;
+        star.y += star.dy;
+
+        if (star.x < 0 || star.x > canvas.width) star.dx *= -1;
+        if (star.y < 0 || star.y > canvas.height) star.dy *= -1;
+      }
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createStars();
+    });
+
+    resizeCanvas();
+    createStars();
+    drawStars();
+  </script>
+</body>
+</html>
