@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TROX WAKED</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+
+    .intro {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #FFD700;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      letter-spacing: 8px;
+      text-shadow: 0 0 20px #FFD700, 0 0 40px #FF6F00;
+      animation: fadeOut 1s ease-in-out 3s forwards;
+      z-index: 2;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .main-ui {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #000000 0%, #0D1B2A 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #FFD700;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out 4s forwards;
+      z-index: 1;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .main-ui h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 15px #FFD700;
+    }
+
+    .main-ui p {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-bottom: 30px;
+      text-align: center;
+      max-width: 300px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      margin: 10px;
+      background: transparent;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #FFD700;
+      color: #000;
+      box-shadow: 0 0 20px #FFD700;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="intro">TROX WAKED</div>
+
+  <div class="main-ui">
+    <h1>Welcome to the Capsule Space</h1>
+    <p>اكتشف كبسولات الفكر في فضاء رقمي غامض. أطلق رسالتك، ارتقِ برتبتك، وادخل عالم TROX.</p>
+    <button class="btn" onclick="goToSpace()">دخول الفضاء</button>
+    <button class="btn" onclick="goToAuth()">تسجيل الدخول لإطلاق كبسولتك</button>
+  </div>
+
+  <canvas id="stars"></canvas>
+
+  <script>
+    function goToSpace() {
+      window.location.href = "space.html";
+    }
+
+    function goToAuth() {
+      window.location.href = "auth.html";
+    }
+
+    // خلفية نجوم متحركة
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5,
+          alpha: Math.random(),
+          dx: (Math.random() - 0.5) * 0.3,
+          dy: (Math.random() - 0.5) * 0.3
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        ctx.fill();
+        star.x += star.dx;
+        star.y += star.dy;
+
+        if (star.x < 0 || star.x > canvas.width) star.dx *= -1;
+        if (star.y < 0 || star.y > canvas.height) star.dy *= -1;
+      }
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createStars();
+    });
+
+    resizeCanvas();
+    createStars();
+    drawStars();
+  </script>
+</body>
+</html>
